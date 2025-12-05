@@ -27,9 +27,9 @@ part2 mtrx acc = case part1 nxt of
 removeAccessible :: [String] -> [String]
 removeAccessible mtrx =
   [ [ (if (y, x) `elem` accss then '.' else get2d mtrx (y, x))
-    | x <- [0 .. length mtrx - 1]
+    | x <- xRange mtrx
     ]
-  | y <- [0 .. length (head mtrx) - 1]
+  | y <- yRange mtrx
   ]
   where
     accss = accessible mtrx
@@ -45,11 +45,17 @@ numAdjRolls mtrx (y, x) = length (filter (== '@') (map (get2d mtrx) (filter (val
 adjacentIdxs :: Coords -> [Coords]
 adjacentIdxs (y, x) = filter (/= (y, x)) [(y + dy, x + dx) | dy <- [-1 .. 1], dx <- [-1 .. 1]]
 
-allIdxs :: [String] -> [Coords]
-allIdxs mtrx = [(y, x) | y <- [0 .. (length mtrx) - 1], x <- [0 .. (length (head mtrx) - 1)]]
-
 validIdx :: [String] -> Coords -> Bool
-validIdx mtrx (y, x) = y `elem` [0 .. length mtrx - 1] && x `elem` [0 .. (length (head mtrx) - 1)]
+validIdx mtrx (y, x) = y `elem` yRange mtrx && x `elem` xRange mtrx
+
+allIdxs :: [String] -> [Coords]
+allIdxs mtrx = [(y, x) | y <- yRange mtrx, x <- xRange mtrx]
+
+xRange :: [String] -> [Int]
+xRange mtrx = [0 .. length mtrx - 1]
+
+yRange :: [String] -> [Int]
+yRange mtrx = [0 .. length (head mtrx) - 1]
 
 get2d :: [String] -> Coords -> Char
 get2d mtrx (y, x) = (mtrx !! y) !! x
