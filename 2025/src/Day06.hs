@@ -1,16 +1,16 @@
 module Day06 (solve) where
 
+import Data.Either
+import Data.List
 import Lib
 import Text.Megaparsec
 import Text.Megaparsec.Char
-import Data.List
-import Data.Either
 
 solve :: IO ()
 solve = do
-    input <- readInput 6
-    putStrLn $ "Part 1: " ++ show (part1 input)
-    putStrLn $ "Part 2: " ++ show (part2 input)
+  input <- readInput 6
+  putStrLn $ "Part 1: " ++ show (part1 input)
+  putStrLn $ "Part 2: " ++ show (part2 input)
 
 -- part 1
 
@@ -25,8 +25,7 @@ part1 input = case traverse (parse (some parseToken) "") input of
 calcColumn :: [[Int]] -> [Char] -> Int -> Int
 calcColumn nums ops i = foldr (op . (!! i)) initl nums
   where
-    op = if ops !! i == '+' then (+) else (*)
-    initl = if ops !! i == '+' then 0 else 1
+    (op, initl) = if ops !! i == '+' then ((+), 0) else ((*), 1)
 
 parseToken :: Parser (Either Int Char)
 parseToken = do
@@ -37,6 +36,8 @@ parseToken = do
 
 -- part 2
 
+-- transposing the input gives us the digits in the order we want, and
+-- the operation always follows the first number of each equation
 part2 :: [String] -> Int
 part2 input = case traverse (parse parseToken2 "") (transpose input) of
   Left _ -> error "bad input"
@@ -44,10 +45,10 @@ part2 input = case traverse (parse parseToken2 "") (transpose input) of
 
 part2' :: (Int -> Int -> Int) -> [Int] -> [(Maybe Int, Maybe Char)] -> [Int]
 part2' _ res [] = res
-part2' op (r:rs) ((Just x, Nothing) : xs) = part2' op (op x r : rs) xs
-part2' op (r:rs) ((Nothing, Nothing) : xs) = part2' op (r : rs) xs
-part2' _ (r:rs) ((Just x, Just o) : xs) = part2' (if o == '+' then (+) else (*)) (x : r : rs) xs
-part2' _ (r:rs) ((Nothing, Just o) : xs) = part2' (if o == '+' then (+) else (*)) (r : rs) xs
+part2' op (r : rs) ((Just x, Nothing) : xs) = part2' op (op x r : rs) xs
+part2' op (r : rs) ((Nothing, Nothing) : xs) = part2' op (r : rs) xs
+part2' _ (r : rs) ((Just x, Just o) : xs) = part2' (if o == '+' then (+) else (*)) (x : r : rs) xs
+part2' _ (r : rs) ((Nothing, Just o) : xs) = part2' (if o == '+' then (+) else (*)) (r : rs) xs
 
 parseToken2 :: Parser (Maybe Int, Maybe Char)
 parseToken2 = do
